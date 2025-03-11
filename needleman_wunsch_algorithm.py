@@ -44,8 +44,6 @@ def needle_wu(sequence1, sequence2, gap_penalty=-2, match=1, mismatch=-1, show=F
 #needle_wu('ACGT','ACGGT',show=True)
 
 
-
-
 def align(sequenceA, sequenceB, Gap=-2, Match=1, Mismatch=-1):
 
     matrix = needle_wu(sequenceA, sequenceB, gap_penalty=Gap, match=Match, mismatch=Mismatch)
@@ -53,41 +51,45 @@ def align(sequenceA, sequenceB, Gap=-2, Match=1, Mismatch=-1):
     #looping for every character in the longer sequence
 
     COLUMN = len(sequenceA)
-    ROW = len(sequenceB) 
+    ROW = len(sequenceB)
 
     #initializing alignment list of lists with the last pair
-    alignment = [['rows','columns'],[matrix.index[ROW],matrix.columns[COLUMN]]]
+    seqA = matrix.columns[COLUMN]
+    seqB = matrix.index[ROW]
 
     for i in range(max(len(sequenceA), len(sequenceB))-1):
 
         #diagonal for match
-        if alignment[-1][0]==alignment[-1][1]:
+        if seqA[-1]==seqB[-1]:
             if matrix.iloc[ROW, COLUMN] == matrix.iloc[ROW-1, COLUMN-1] + Match:
                 ROW -= 1
                 COLUMN -= 1
-                alignment.append([matrix.index[ROW],matrix.columns[COLUMN]])
+                seqA = seqA + matrix.columns[COLUMN]
+                seqB = seqB + matrix.index[ROW]
+
 
         else:
             if matrix.iloc[ROW, COLUMN] == matrix.iloc[ROW-1, COLUMN-1] + Mismatch:
                 ROW -= 1
                 COLUMN -= 1
-                alignment.append([matrix.index[ROW],matrix.columns[COLUMN]])
+                seqA = seqA + matrix.columns[COLUMN]
+                seqB = seqB + matrix.index[ROW]
 
             #from above
             if matrix.iloc[ROW, COLUMN] == matrix.iloc[ROW-1, COLUMN] + Gap:
                 ROW -= 1
-                alignment[-1][1]='-' #substitute a gap into last seqA charcater
-                alignment.append([matrix.index[ROW], matrix.columns[COLUMN]])
-
+                seqA = seqA[:-1] + '-' + matrix.columns[COLUMN]
+                seqB = seqB + matrix.index[ROW]
+                
             #from left
             else:
                 COLUMN-=1
-                alignment[-1][0]='-'  #substituto a gap into last seqB character
-                alignment.append([matrix.index[ROW], matrix.columns[COLUMN]])
+                seqB = seqB[:-1] + '-' + matrix.index[ROW]
+                seA = seqA + matrix.columns[ROW]
 
-    return alignment
-        
+    print(f'seq1 : {seqA}')
+    print(f'seq2 : {seqB}')
+
+    return seqA, seqB
 
 print(align('ACGT','ACGGT'))
-
-
