@@ -60,5 +60,41 @@ def sw_align(sequenceA, sequenceB, Gap=-2, Match=1, Mismatch=-1):
     seqA = matrix.columns[j]
     seqB = matrix.index[i]
 
-    while matrix[i-1,j]!=0 and matrix[i,j-1]!=0 and matrix[i-1,j-1]!=0:
-        
+    while i>=0 and j>=0 and matrix.iloc[i,j] > 0:
+
+        diag = matrix.iloc[i-1,j-1]
+        up = matrix.iloc[i-1, j]
+        left = matrix.iloc[i,j-1]
+
+        max_val = max(diag, up, left)
+
+        if max_val<=0:
+            break
+
+        if diag==max_val:
+            i -= 1
+            j -= 1
+            seqA = matrix.columns[j] + seqA
+            seqB = matrix.index[i] + seqB
+
+        elif up==max_val:
+            i -= 1
+            seqA = '-' + seqA
+            seqB = matrix.index[i] + seqB 
+
+        else:
+            j -= 1
+            seqA = matrix.columns[j] + seqA
+            seqB = '-' + seqB
+
+    print(seqA)
+    print()
+    print(seqB)
+
+    return seqA, seqB
+            
+    
+
+sw_align('ATTC','ATTGCG')
+    
+
