@@ -89,3 +89,19 @@ def rBWT(L:list, F:list):
 #print(L)
 #print(F)     
 #print(rBWT(L,F))
+
+def match(P:str, L:list, F:list):
+    '''
+    matches the query string P to the original string T leveraging FM index properties
+    returns the number of times P is found in T, if present at all. 
+    '''
+
+    #this goes from len(p)-1 to 0 (-1 excluded), last -1 means backwards
+    for i in range(len(P)-1, -1, -1):
+        
+
+        
+        for pair in F:
+            if pair[0]==P[i]:
+
+
