@@ -26,13 +26,14 @@ def structure(T:str):
 
 def rotate(T:str):
 
+    pairs = structure(T)
     rotations = []
 
-    for i in range(len(T)):
-        #creating rotated string
-        S = T[i:] + T[:i]
-        #adding the rotated string to the list
-        rotations.append(S)
+    for i in range(len(pairs)):
+        
+        rotated_pairs = pairs[i:] + pairs[:i]
+        #adding the rotated pairs to the list
+        rotations.append(rotated_pairs)
 
     return rotations
 
@@ -40,27 +41,51 @@ def rotate(T:str):
 #print(rotate('abaaba$'))
 #out: ['abaaba$', 'baaba$a', 'aaba$ab', 'aba$aba', 'ba$abaa', 'a$abaab', '$abaaba']
 
-def BWT(T:str, show=False):
+def BWT(T:str, show=True):
     
     #computig all the rotations and sorting them
     sorted_rotations = sorted(rotate(T))
     
-    bwt = []
+    F = []
+    L = []
 
     for rotation in sorted_rotations:
-        last_char = structure(rotation)[-1]
-        bwt.append(last_char)
+        F.append(rotation[0]) #first char
+        L.append(rotation[-1]) #last char
     
     #optional display
     if show==True:
         str_bwt = ''
-        for pair in bwt:
+        for pair in L:
             str_bwt += pair[0]
         print(str_bwt)
 
-    return bwt
+    return L, F 
 
 #test
 #BWT('abaaba$',show=True)
 #printed: abba$aa
 
+
+def rBWT(L:list, F:list):
+
+    row = 0 #row starting with $
+    rbwt = '$'
+
+    for i in range(len(L)-1):
+        
+        last_char = L[row][0]
+        rbwt = last_char + rbwt
+
+        
+        #finding the next row usint L and F
+        target_pair = L[row]
+        row = F.index(target_pair) #index of char in F 
+
+    return rbwt
+
+#test
+#L, F = BWT('abaaba$',show=False)   
+#print(L)
+#print(F)     
+#print(rBWT(L,F))
