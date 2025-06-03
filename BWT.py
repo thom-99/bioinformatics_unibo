@@ -90,18 +90,67 @@ def rBWT(L:list, F:list):
 #print(F)     
 #print(rBWT(L,F))
 
-def match(P:str, L:list, F:list):
-    '''
-    matches the query string P to the original string T leveraging FM index properties
-    returns the number of times P is found in T, if present at all. 
-    '''
+                
 
-    #this goes from len(p)-1 to 0 (-1 excluded), last -1 means backwards
+def match(P: str, L: list, F: list):
+    
+    top_row = 0
+    bottom_row = len(F)-1
+
+    # process each character from last to first
     for i in range(len(P)-1, -1, -1):
+        char = P[i]
+        new_top = None
+        new_bottom = None
+
+        #search the current char in F
+        for j in range(top_row, bottom_row+1):
+            if F[j][0]==char:
+                if new_top==None:
+                    new_top=j
+                new_bottom=j
         
+        #if no character is found, that means 0 matches 
+        if new_top==None:
+            return 0
 
-        
-        for pair in F:
-            if pair[0]==P[i]:
+        #update top and bottom row for the current character
+        top_row=new_top
+        bottom_row=new_bottom
+
+        #LF mappinig part
+        if i > 0: #do not perform LF mapping on the last iteration
+            next_char = P[i-1]
+            lf_top = None
+            lf_bottom = None
+
+            for j in range(top_row, bottom_row+1):
+                if L[j][0]==next_char:
+                    l_pair = L[j]
+                    f_pair_index = F.index(l_pair) #finds where the l_pair tuple appears on F column
+
+                    if lf_top==None:  #this occurs only on the first iteration
+                        lf_top = f_pair_index
+                        lf_bottom = f_pair_index
+                    else:
+                        #this occurs on every other iteration : building a range
+                        lf_top = min(lf_top, f_pair_index)
+                        lf_bottom = max(lf_bottom, f_pair_index)
+            
+            if lf_top==None:
+                return 0
+
+            top_row = lf_top
+            bottom_row = lf_bottom
+    
+    #adding a 1 because I am counting a count of elements, not a distance
+    return bottom_row - top_row +1 
 
 
+P = ('hope','string2','KKK')
+
+L, F = BWT('ACTGTAstring2CTTGhopeGGACGTACTGATstring2GGTAC$',show=False)
+print(L)
+print(F)
+for p in P:
+    print(match(p,L,F))
