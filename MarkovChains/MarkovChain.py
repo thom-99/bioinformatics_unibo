@@ -1,6 +1,6 @@
 import pandas as pd
 from collections import defaultdict
-import numpy
+import math
 
 def parsefasta(filename:str):
     sequences = []
@@ -61,9 +61,27 @@ def dinucleofrequencies(sequences):
     return df 
 
 
+def computeProb(sequence:str, model:pd.DataFrame):
+    sequence = sequence.upper()
+    sequence = sequence.strip()
+    P = 0.25 
+    for i in range(1,len(sequence)):
+        conditional_p = model.loc[sequence[i-1], sequence[i]]
+        P = P*conditional_p
+    
+    return P 
+
+def isCpG(P_inside:float, P_outside:float):
+    log_ratio = math.log(P_inside/P_outside)
+    if log_ratio>0:
+        print(f'log ratio : {log_ratio}, likely part of a CpG island')
+    else:
+        print(f'log ratio : {log_ratio}, likely NOT part of a CpG island')
+
+    return log_ratio
 
 
-
+# EXECUTION
 
 inside_data = parsefasta('chr22_CpG.fa')
 inside_model = dinucleofrequencies(inside_data)
@@ -71,6 +89,23 @@ inside_model = dinucleofrequencies(inside_data)
 outside_data = parsefasta('outside_sequences.fa')
 outside_model = dinucleofrequencies(outside_data)
 
-print(inside_model)
-print()
-print(outside_model)
+#print(inside_model)
+#print()
+#print(outside_model)
+
+
+CpGseq = "gccttgagatacccctagcggtccagaggcgcaccctggtttcgagccagggacgctagggtctctggggcccagtgtagggctgatgggtagggacgttggtccgtgggggacccaggcgccacttctgggcgccgcagttttttattttttttctctgccccaggtgtctcacctttc"
+
+P_inside = computeProb(CpGseq, inside_model)
+P_outside = computeProb(CpGseq, outside_model)
+isCpG(P_inside, P_outside)
+
+# output : log ratio : 5.277031975772654, likely part of a CpG island
+
+outside_seq = "CATGTCTCTTTATGAATGCCTGCAGACCCAGACCTAGGTGATGATGCCCCCACTCACCTACCCCCAAAATTAATTTAAAGCAATAGCTTCTCATTGGATGGTTGTAATGACCAACATTTAGCTCTTGGGTCTTCTGTTGGCCAGTTAATTTGGTAGTCATTTGCTTCTCATGGTCAGGAA"
+
+P_inside2 = computeProb(outside_seq, inside_model)
+P_outside2 = computeProb(outside_seq, outside_model)
+isCpG(P_inside2, P_outside2)
+
+# output : log ratio : -26.39676965080549, likely NOT part of a CpG islan
